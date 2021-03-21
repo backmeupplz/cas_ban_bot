@@ -1,23 +1,25 @@
-# Telegram bot template based on telegraf.js.org
+# Code for the [@cas_ban_bot](https://t.me/cas_ban_bot) Telegram bot
 
-Please, enjoy this starter template for Telegram bots based on telegraf.js.org. It includes most common middlewares used by me, MongoDB integration, language picker and internationalization and shows basic encapsulation techniques used by me.
+Bot that checks whether a user is banned by [CAS](https://cas.chat).
 
 # Installation and local launch
 
-1. Clone this repo: `git clone https://github.com/backmeupplz/telegraf-template`
-2. Launch the [mongo database](https://www.mongodb.com/) locally
-3. Create `.env` with the environment variables listed below
-4. Run `yarn install` in the root folder
-5. Run `yarn develop`
+1. Clone this repo: `git clone https://github.com/backmeupplz/cas_ban_bot`
+2. Create `.env` with the environment variables listed below
+3. Run `yarn` in the root folder
+4. Run `yarn develop`
 
 And you should be good to go! Feel free to fork and submit pull requests. Thanks!
 
 # Environment variables
 
 - `TOKEN` — Telegram bot token
-- `MONGO`— URL of the mongo database
 
 Also, please, consider looking at `.env.sample`.
+
+# Continuous integration
+
+`main` branch of this repository gets automatically deployed to [@cas_ban_bot](https://t.me/cas_ban_bot) via [ci-ninja](https://github.com/backmeupplz/ci-ninja).
 
 # License
 
