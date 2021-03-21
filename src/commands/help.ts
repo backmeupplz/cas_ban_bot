@@ -1,8 +1,9 @@
-// Dependencies
-import { Telegraf, Context } from "telegraf";
+import { Context, Extra } from 'telegraf'
+import { ExtraReplyMessage } from 'telegraf/typings/telegram-types'
 
-export function setupHelp(bot: Telegraf<Context>) {
-  bot.command(['help', 'start'], ctx => {
-    ctx.replyWithHTML(ctx.i18n.t('help'))
-  })
+export function sendHelp(ctx: Context) {
+  return ctx.reply(
+    'Forward message from any user or send their Telegram ID to this bot and it will check if the user is banned at cas.chat. Sources: bit.ly/390HvpF.',
+    Extra.webPreview(false) as ExtraReplyMessage
+  )
 }
