@@ -11,6 +11,7 @@ import { handleId } from '@/helpers/handleId'
 import { checkForwards } from '@/middlewares/checkForwards'
 import { checkTime } from '@/middlewares/checkTime'
 import { ExtraReplyMessage } from 'telegraf/typings/telegram-types'
+import { checkCas } from '@/commands/checkCas'
 
 // Check time
 bot.use(checkTime)
@@ -18,6 +19,7 @@ bot.use(checkTime)
 bot.use(checkForwards)
 // Setup commands
 bot.command(['help', 'start'], sendHelp)
+bot.command('checkCas', checkCas)
 // Telegram ID
 bot.hears(/-?\d+/g, handleId)
 // Errors
