@@ -4,8 +4,9 @@ import { ExtraReplyMessage } from 'telegraf/typings/telegram-types'
 
 export async function checkForwards(ctx: Context, next: Function) {
   if (
-    !ctx.message?.forward_from &&
-    !(ctx.message as any)?.forward_sender_name
+    (!ctx.message?.forward_from &&
+      !(ctx.message as any)?.forward_sender_name) ||
+    ctx.chat.type !== 'private'
   ) {
     return next()
   }
