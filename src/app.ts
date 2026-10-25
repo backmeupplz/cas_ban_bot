@@ -12,7 +12,21 @@ import { checkForwards } from '@/middlewares/checkForwards'
 import { checkTime } from '@/middlewares/checkTime'
 import { ExtraReplyMessage } from 'telegraf/typings/telegram-types'
 import { checkCas } from '@/commands/checkCas'
+import { pollWithHandover } from '@/helpers/handover'
 
+// The newest update fetched and the handlers still running, for handing polling over on deploys
+let lastUpdate = 0
+let handling = 0
+let stopping = false
+bot.use(async (ctx, next) => {
+  lastUpdate = Math.max(lastUpdate, ctx.update.update_id)
+  handling++
+  try {
+    await next()
+  } finally {
+    handling--
+  }
+})
 // Check time
 bot.use(checkTime)
 // Check forwards
@@ -30,6 +44,31 @@ bot.catch((err, ctx: Context) => {
   )
 })
 // Start bot
-bot.launch().then(() => {
-  console.info('Bot is up and running')
-})
+pollWithHandover(
+  () =>
+    bot
+      .launch({
+        polling: {
+          // Telegraf 3 stops polling for good on 401/409 from getUpdates and the process
+          // then idles. Exit 1 instead, so the bot gets restarted
+          stopCallback: () => {
+            if (stopping) return
+            console.error('Polling stopped, exiting so the bot gets restarted')
+            process.exit(1)
+          },
+        },
+      })
+      .then(() => {
+        console.info('Bot is up and running')
+      }),
+  async () => {
+    stopping = true
+    bot.stop()
+    // Telegraf 3 cannot abort its long poll: a zero-timeout getUpdates ends it
+    // and confirms every update fetched, so the next poller does not get them again
+    await (bot.telegram as any).getUpdates(0, 1, lastUpdate + 1, undefined)
+  },
+  async () => {
+    while (handling) await new Promise((resolve) => setTimeout(resolve, 100))
+  }
+)
