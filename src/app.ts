@@ -44,23 +44,30 @@ bot.catch((err, ctx: Context) => {
   )
 })
 // Start bot
-pollWithHandover(
-  () =>
-    bot
-      .launch({
-        polling: {
-          // Telegraf 3 stops polling for good on 401/409 from getUpdates and the process
-          // then idles. Exit 1 instead, so the bot gets restarted
-          stopCallback: () => {
-            if (stopping) return
-            console.error('Polling stopped, exiting so the bot gets restarted')
-            process.exit(1)
-          },
+function launch(): Promise<void> {
+  return bot
+    .launch({
+      polling: {
+        // Telegraf 3 stops polling for good on 401/409 from getUpdates and the process
+        // then idles. Exit 1 instead, so the bot gets restarted
+        stopCallback: () => {
+          if (stopping) return
+          console.error('Polling stopped, exiting so the bot gets restarted')
+          process.exit(1)
         },
-      })
-      .then(() => {
-        console.info('Bot is up and running')
-      }),
+      },
+    })
+    .then(() => {
+      if (stopping) return
+      // launch() only logs a failed getMe (e.g. a network blip at boot) and never polls: retry
+      if (!(bot as any).polling.started) {
+        return new Promise((resolve) => setTimeout(resolve, 1000)).then(launch)
+      }
+      console.info('Bot is up and running')
+    })
+}
+pollWithHandover(
+  launch,
   async () => {
     stopping = true
     bot.stop()
